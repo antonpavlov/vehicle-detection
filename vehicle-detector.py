@@ -15,7 +15,6 @@ from sklearn.svm import LinearSVC
 import time
 
 from moviepy.editor import VideoFileClip
-from IPython.display import HTML
 
 
 # *** FUNCTIONS ***
@@ -613,10 +612,27 @@ if __name__ == "__main__":
 
     # Train support vector machine
     svc = LinearSVC()
+
+    # Check the training time for the SVC
+    t = time.time()
     svc.fit(X_train, y_train)
+    t2 = time.time()
+    print(round(t2 - t, 2), 'Seconds to train SVC...')
+    # Check the score of the SVC
+    print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
+    # Check the prediction time for a single sample
+    t = time.time()
+    n_predict = 10
+    print('My SVC predicts: ', svc.predict(X_test[0:n_predict]))
+    print('For these', n_predict, 'labels: ', y_test[0:n_predict])
+    t2 = time.time()
+    print(round(t2 - t, 5), 'Seconds to predict', n_predict, 'labels with SVC')
+
+
+    #svc.fit(X_train, y_train)
 
     # Check the test accuarcy of the linear support vector machine
-    svc.score(X_test, y_test)
+    print('SVC accuracy: ', svc.score(X_test, y_test))
 
     image = mpimg.imread('test_images/test6.jpg')
     draw_image = np.copy(image)
@@ -653,7 +669,6 @@ if __name__ == "__main__":
     window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
     window_img2 = draw_boxes(window_img, hot_windows2, color=(0, 0, 255), thick=6)
     window_img3 = draw_boxes(window_img2, hot_windows2, color=(0, 0, 255), thick=6)
-    plt.imshow(window_img3)
 
     # Plot the examples
     ax1 = plt.figure()

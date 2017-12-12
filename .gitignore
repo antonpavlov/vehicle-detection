@@ -105,3 +105,8 @@ ENV/
 dataset/
 
 .vscode/
+
+__MACOSX/
+
+OUTPUT_VIDEO_sub.mp4
+dataset.zip
