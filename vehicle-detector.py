@@ -8,6 +8,7 @@ import matplotlib.image as mpimg
 import glob
 from sklearn import svm
 from sklearn.utils import shuffle
+from scipy.ndimage.measurements import label
 from sklearn.model_selection import train_test_split
 from skimage.feature import hog
 from sklearn.preprocessing import StandardScaler
@@ -462,12 +463,13 @@ def draw_labeled_boxes(img, labels):
     return img
 
 
+# Ready for test - not commented
 def vehicle_detection(image, ystart, ystop, scale, svc, X_Scaler, orient,pix_per_cell, cell_per_block, spatial_size,
                       hist_bins, threshold):
     #find cars in image
     out_img, boxes = find_cars(image, ystart, ystop, scale, svc, X_Scaler, orient,
                                pix_per_cell, cell_per_block, spatial_size, hist_bins)
-    heat = np.zeros_like(img_test[:,:,0]).astype(np.float)
+    heat = np.zeros_like(image[:, :, 0]).astype(np.float)
     box_list = boxes
     heat = add_heat(heat, box_list)
     heat= apply_threshold(heat, threshold)
@@ -476,10 +478,10 @@ def vehicle_detection(image, ystart, ystop, scale, svc, X_Scaler, orient,pix_per
     draw_img = draw_labeled_boxes(np.copy(image), labels)
     return draw_img
 
-
+# Ready for test - not commented
 def process_image(image):
     #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    processed_img = vehicle_detection(image, ystart, ystop, scale, svc, X_Scaler, orient,pix_per_cell, cell_per_block, spatial_size,
+    processed_img = vehicle_detection(image, ystart, ystop, scale, svc, X_rescaled, orient,pix_per_cell, cell_per_block, spatial_size,
                       hist_bins, threshold)
     return processed_img
 
@@ -534,81 +536,86 @@ if __name__ == "__main__":
         ax3 = plt.imshow(window_img)
         ax3 = plt.savefig(fname[:-4] + '_C_slidingWindows.png')
 
-    # RGB, HSV, LUV, HLS, YUV, YCrCb
-    color_space = 'YCrCb'
-    # HOG orientations
-    orient = 9
-    # Pix per cell
-    pix_per_cell = 8
-    # Cells per block
-    cell_per_block = 2
-    # Hog channel (1,2,3 or ALL)
-    hog_channel = "ALL"
-    # Dimension for spatial binning
-    spatial_size = (32, 32)
-    # Number of histogram bins
-    hist_bins = 32
+    # MAIN PARAMETERS
+    color_space = 'YCrCb'  # RGB, HSV, LUV, HLS, YUV, YCrCb
+    orient = 9  # HOG orientation
+    pix_per_cell = 8  # Pix per cell
+    cell_per_block = 2  # Cells per block
+    hog_channel = "ALL"  # Hog channels 1, 2, 3 or ALL
+    spatial_size = (32, 32)  # Spatial binning
+    hist_bins = 32  # Histogram bins
     spatial_feat = True
     hist_feat = True
     hog_feat = True
     y_start_stop = [350, None]
     hist_range = (0, 256)
 
-    images = glob.glob('*.jpeg')
-    cars = []
-    notcars = []
-
+    # Load training dataset
     vehicles = glob.glob('./dataset/vehicles/*/*.png')
-    vehs = []
-    non_vehs = []
+    cars = []
+    noncars = []
 
-
+    # Populate cars
     for image in vehicles:
-        vehs.append(image)
+        cars.append(image)
 
-
+    # Populate non-cars
     non_vehicles = glob.glob('./dataset/non-vehicles/*/*.png')
 
     for image in non_vehicles:
-        non_vehs.append(image)
-
+        noncars.append(image)
 
     if __debug__:
         print("Images were loaded successfully!")
+        car_ind = np.random.randint(0, len(cars))
+        notcar_ind = np.random.randint(0, len(noncars))
+
+        # Read in car / not-car images
+        car_image = mpimg.imread(cars[car_ind])
+        notcar_image = mpimg.imread(noncars[notcar_ind])
+        # Plot the examples
+        ax1 = plt.figure()
+        ax1 = plt.clf()
+        ax1 = plt.subplot(121)
+        ax1 = plt.imshow(car_image)
+        ax1 = plt.title('Example Car Image')
+        ax1 = plt.subplot(122)
+        ax1 = plt.imshow(notcar_image)
+        ax1 = plt.title('Example Not-car Image')
+        ax1 = plt.savefig('datasetExamples.png')
 
     # Get the features of cars and noncars
-    car_features = extract_features(vehs, color_space, spatial_size, hist_bins, orient, pix_per_cell,
+    car_features = extract_features(cars, color_space, spatial_size, hist_bins, orient, pix_per_cell,
                                     cell_per_block, hog_channel)
 
-    noncar_features = extract_features(non_vehs, color_space, spatial_size, hist_bins, orient, pix_per_cell,
+    noncar_features = extract_features(noncars, color_space, spatial_size, hist_bins, orient, pix_per_cell,
                                        cell_per_block, hog_channel)
 
-    # Check length of extracted image paths
+    if __debug__:
+        print("Features were extracted successfully!")
+        print("Length of car features: ", len(car_features))
+        print("Length of non-car features: ", len(noncar_features))
+        print("Shape of car features: ", np.shape(car_features))
+        print("Shape of non-car features: ", np.shape(noncar_features))
 
-    print(len(car_features))
-    print(len(noncar_features))
-    print(np.shape(car_features))
-    print(np.shape(noncar_features))
-
+    # Build-up a dataset
     y = np.hstack((np.ones(len(car_features)), np.zeros(len(noncar_features))))
-    print(y.shape)
+    if __debug__:
+        print("Create a label vector with the following shape: ", y.shape)
 
     X = np.vstack((car_features, noncar_features)).astype(np.float64)
-    print(X.shape)
+    if __debug__:
+        print("Create a vertical stack of features X with the following shape: ", X.shape)
 
     # Normalize training data
-    from sklearn.preprocessing import StandardScaler
+    X_rescaled = StandardScaler().fit(X)
+    X_transformed = X_rescaled.transform(X)
 
-    X_Scaler = StandardScaler().fit(X)
-    X_scaled = X_Scaler.transform(X)
-
-    from sklearn.model_selection import train_test_split
-
-    rand_state = np.random.randint(0, 100)
-    # Split data in train/test data and shuffle it
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=rand_state)
-
-    from sklearn.svm import LinearSVC
+    # Shuffle and split the data
+    X_transformed, y = shuffle(X_transformed, y)
+    X_train, X_test, y_train, y_test = train_test_split(X_transformed, y, test_size=0.2)
+    if __debug__:
+        print("Training data was shuffled and split successfully!")
 
     # Train support vector machine
     svc = LinearSVC()
@@ -617,104 +624,100 @@ if __name__ == "__main__":
     t = time.time()
     svc.fit(X_train, y_train)
     t2 = time.time()
-    print(round(t2 - t, 2), 'Seconds to train SVC...')
-    # Check the score of the SVC
-    print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
-    # Check the prediction time for a single sample
-    t = time.time()
-    n_predict = 10
-    print('My SVC predicts: ', svc.predict(X_test[0:n_predict]))
-    print('For these', n_predict, 'labels: ', y_test[0:n_predict])
-    t2 = time.time()
-    print(round(t2 - t, 5), 'Seconds to predict', n_predict, 'labels with SVC')
+    if __debug__:
+        print(round(t2 - t, 2), 'Seconds to train SVC...')
+        print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
+        t = time.time()
+        n_predict = 10
+        print('The SVC predicts: ', svc.predict(X_test[0:n_predict]))
+        print('For these', n_predict, 'labels: ', y_test[0:n_predict])
+        t2 = time.time()
+        print(round(t2 - t, 5), 'Seconds to predict', n_predict, 'labels with SVC')
 
+    # Read test images from folder
+    test_images = glob.glob('./test_images/*.jpg')
 
-    #svc.fit(X_train, y_train)
+    for idx, f_name in enumerate(test_images):
+        image = mpimg.imread(f_name)
+        draw_image = np.copy(image)
 
-    # Check the test accuarcy of the linear support vector machine
-    print('SVC accuracy: ', svc.score(X_test, y_test))
+        # Scale the image since its a .jpg
+        image = image.astype(np.float32) / 255
 
-    image = mpimg.imread('test_images/test6.jpg')
-    draw_image = np.copy(image)
+        # Search with three different window sizes
+        windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+                                xy_window=(100, 100), xy_overlap=(0.5, 0.5))
+        windows2 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+                                xy_window=(200, 200), xy_overlap=(0.3, 0.3))
+        windows3 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+                                xy_window=(64, 64), xy_overlap=(0.3, 0.3))
 
-    # Scale the image since its a .jpg
-    image = image.astype(np.float32) / 255
+        # Get the found windows that match the features as list
+        hot_windows = search_windows(image, windows, svc, X_rescaled, color_space=color_space,
+                                    spatial_size=spatial_size, hist_bins=hist_bins,
+                                    orient=orient, pix_per_cell=pix_per_cell,
+                                    cell_per_block=cell_per_block,
+                                    hog_channel=hog_channel)
+        hot_windows2 = search_windows(image, windows2, svc, X_rescaled, color_space=color_space,
+                                    spatial_size=spatial_size, hist_bins=hist_bins,
+                                    orient=orient, pix_per_cell=pix_per_cell,
+                                    cell_per_block=cell_per_block,
+                                    hog_channel=hog_channel)
+        hot_windows3 = search_windows(image, windows3, svc, X_rescaled, color_space=color_space,
+                                    spatial_size=spatial_size, hist_bins=hist_bins,
+                                    orient=orient, pix_per_cell=pix_per_cell,
+                                    cell_per_block=cell_per_block,
+                                    hog_channel=hog_channel)
 
-    # Search with three different window sizes
-    windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                           xy_window=(100, 100), xy_overlap=(0.5, 0.5))
-    windows2 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                            xy_window=(200, 200), xy_overlap=(0.3, 0.3))
-    windows3 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
-                            xy_window=(64, 64), xy_overlap=(0.3, 0.3))
+        # Draw the found windows that match the features in boxes
+        window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
+        window_img2 = draw_boxes(window_img, hot_windows2, color=(0, 0, 255), thick=6)
+        window_img3 = draw_boxes(window_img2, hot_windows3, color=(0, 0, 255), thick=6)
 
-    # Get the found windows that match the features as list
-    hot_windows = search_windows(image, windows, svc, X_Scaler, color_space=color_space,
-                                 spatial_size=spatial_size, hist_bins=hist_bins,
-                                 orient=orient, pix_per_cell=pix_per_cell,
-                                 cell_per_block=cell_per_block,
-                                 hog_channel=hog_channel)
-    hot_windows2 = search_windows(image, windows2, svc, X_Scaler, color_space=color_space,
-                                  spatial_size=spatial_size, hist_bins=hist_bins,
-                                  orient=orient, pix_per_cell=pix_per_cell,
-                                  cell_per_block=cell_per_block,
-                                  hog_channel=hog_channel)
-    hot_windows3 = search_windows(image, windows3, svc, X_Scaler, color_space=color_space,
-                                  spatial_size=spatial_size, hist_bins=hist_bins,
-                                  orient=orient, pix_per_cell=pix_per_cell,
-                                  cell_per_block=cell_per_block,
-                                  hog_channel=hog_channel)
+        # Plot the examples
+        ax1 = plt.figure()
+        ax1 = plt.clf()
+        ax1 = plt.imshow(window_img3)
+        ax1 = plt.savefig('test_images.png')
 
-    # Draw the found windows that match the features in boxes
-    window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
-    window_img2 = draw_boxes(window_img, hot_windows2, color=(0, 0, 255), thick=6)
-    window_img3 = draw_boxes(window_img2, hot_windows2, color=(0, 0, 255), thick=6)
+        ystart = 400
+        ystop = 656
+        scale = 1.5
 
-    # Plot the examples
-    ax1 = plt.figure()
-    ax1 = plt.clf()
-    ax1 = plt.imshow(window_img3)
-    ax1 = plt.savefig('test_images.png')
+        out_img, boxes = find_cars(image, ystart, ystop, scale, svc, X_rescaled, orient, pix_per_cell, cell_per_block,
+                                   spatial_size, hist_bins)
+        if __debug__:
+            # Plot the examples
+            ax2 = plt.figure()
+            ax2 = plt.clf()
+            ax2 = plt.imshow(out_img)
+            ax2 = plt.savefig('test_image_boxes.png')
 
-    ystart = 400
-    ystop = 656
-    scale = 1.5
-    img_test = mpimg.imread('test_images/test1.jpg')
+            print("Boxes found: ", boxes)
 
-    out_img, boxes = find_cars(img_test, ystart, ystop, scale, svc, X_Scaler, orient, pix_per_cell, cell_per_block,
-                               spatial_size, hist_bins)
+        threshold = 1
+        heat = np.zeros_like(image[:, :, 0]).astype(np.float)
+        heat = add_heat(heat, boxes)
+        heat = apply_threshold(heat, threshold)
+        heatmap = np.clip(heat, 0, 255)
 
-    # Plot the examples
-    ax2 = plt.figure()
-    ax2 = plt.clf()
-    ax2 = plt.imshow(out_img)
-    ax2 = plt.savefig('test_image_boxes.png')
+        labels = label(heatmap)
+        if __debug__:
+            print("Vehicles found: ", labels[1])
+            plt.imshow(labels[0], cmap='hot')
 
-    print(boxes)
-
-    threshold = 1
-    heat = np.zeros_like(img_test[:, :, 0]).astype(np.float)
-
-    heat = add_heat(heat, boxes)
-    heat = apply_threshold(heat, threshold)
-    heatmap = np.clip(heat, 0, 255)
-    from scipy.ndimage.measurements import label
-
-    labels = label(heatmap)
-    print(labels[1], 'vehicles found')
-    plt.imshow(labels[0], cmap='hot')
-
-    draw_img2 = draw_labeled_boxes(np.copy(img_test), labels)
-    # Plot the examples
-    ax3 = plt.figure()
-    ax3 = plt.clf()
-    ax3 = plt.imshow(draw_img2)
-    ax3 = plt.savefig('heatmap.png')
+        draw_img2 = draw_labeled_boxes(np.copy(image), labels)
+        if __debug__:
+            # Plot the examples
+            ax3 = plt.figure()
+            ax3 = plt.clf()
+            ax3 = plt.imshow(draw_img2)
+            ax3 = plt.savefig('heatmap.png')
+        # End of FOR loop
 
     # Process video
-    video_input = VideoFileClip("./project_video.mp4")  # .subclip(35, 45)  # Subclip for most challenging interval
+    video_input = VideoFileClip("./project_video.mp4")
     video_output = './OUTPUT_VIDEO.mp4'
 
     output_clip = video_input.fl_image(process_image)
     output_clip.write_videofile(video_output, audio=False)
-
