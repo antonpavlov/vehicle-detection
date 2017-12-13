@@ -500,9 +500,14 @@ if __name__ == "__main__":
         image = mpimg.imread(fname)
         bboxes = [((275, 572), (380, 510)), ((488, 563), (549, 518)), ((554, 543), (582, 522)), ((601, 555), (646, 522)), ((657, 545), (685, 517)), ((849, 678), (1135, 512))]
         result = draw_boxes(image, bboxes)
+        ax1 = plt.figure()
         ax1 = plt.clf()
+        ax1 = plt.subplot(121)
+        ax1 = plt.imshow(image)
+        ax1 = plt.subplot(122)
         ax1 = plt.imshow(result)
-        ax1 = plt.savefig(fname[:-4] + '_A_boxes.png')
+        ax1 = plt.savefig(fname[:-4] + '_1_boxes.png')
+
 
     # Unit test on Support Vector Machine from sklearn
     if __debug__:
@@ -522,9 +527,13 @@ if __name__ == "__main__":
         fname = './tests/calibration-test.jpg'
         image = mpimg.imread(fname)
         undist_image = cv2.undistort(image, mtx, dist, None, mtx)
+        ax2 = plt.figure()
         ax2 = plt.clf()
+        ax2 = plt.subplot(121)
+        ax2 = plt.imshow(image)
+        ax2 = plt.subplot(122)
         ax2 = plt.imshow(undist_image)
-        ax2 = plt.savefig(fname[:-4] + '_B_undistort.png')
+        ax2 = plt.savefig(fname[:-4] + '_2_undistort.png')
 
     # Unit test on sliding window function
     if __debug__:
@@ -532,9 +541,13 @@ if __name__ == "__main__":
         image = mpimg.imread(fname)
         windows = slide_window(image, x_start_stop=[None, None], y_start_stop=[None, None], xy_window=(128, 128), xy_overlap=(0.5, 0.5))
         window_img = draw_boxes(image, windows, color=(0, 0, 255), thick=6)
+        ax3 = plt.figure()
         ax3 = plt.clf()
+        ax3 = plt.subplot(121)
+        ax3 = plt.imshow(image)
+        ax3 = plt.subplot(122)
         ax3 = plt.imshow(window_img)
-        ax3 = plt.savefig(fname[:-4] + '_C_slidingWindows.png')
+        ax3 = plt.savefig(fname[:-4] + '_3_slidingWindows.png')
 
     # MAIN PARAMETERS
     color_space = 'YCrCb'  # RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -574,17 +587,17 @@ if __name__ == "__main__":
         car_image = mpimg.imread(cars[car_ind])
         notcar_image = mpimg.imread(noncars[notcar_ind])
         # Plot the examples
-        ax1 = plt.figure()
-        ax1 = plt.clf()
-        ax1 = plt.subplot(121)
-        ax1 = plt.imshow(car_image)
-        ax1 = plt.title('Example Car Image')
-        ax1 = plt.subplot(122)
-        ax1 = plt.imshow(notcar_image)
-        ax1 = plt.title('Example Not-car Image')
-        ax1 = plt.savefig('datasetExamples.png')
+        ax4 = plt.figure()
+        ax4 = plt.clf()
+        ax4 = plt.subplot(121)
+        ax4 = plt.imshow(car_image)
+        ax4 = plt.title('Example Car Image')
+        ax4 = plt.subplot(122)
+        ax4 = plt.imshow(notcar_image)
+        ax4 = plt.title('Example Not-car Image')
+        ax4 = plt.savefig('datasetExamples.png')
 
-    # Get the features of cars and noncars
+    # Get the features of cars and non-cars
     car_features = extract_features(cars, color_space, spatial_size, hist_bins, orient, pix_per_cell,
                                     cell_per_block, hog_channel)
 
@@ -606,6 +619,23 @@ if __name__ == "__main__":
     X = np.vstack((car_features, noncar_features)).astype(np.float64)
     if __debug__:
         print("Create a vertical stack of features X with the following shape: ", X.shape)
+
+    # Get an example of HOG
+    if __debug__:
+        print("An example of HOG feature extraction, check HOG_features.png file")
+        test_img = mpimg.imread(cars[car_ind])
+        gray = cv2.cvtColor(test_img, cv2.COLOR_RGB2GRAY)
+        feature, hog_image = get_hog_features(gray, orient, pix_per_cell, cell_per_block, vis=True, feature_vec=False)
+        # Plot the examples
+        ax5 = plt.figure()
+        ax5 = plt.clf()
+        ax5 = plt.subplot(121)
+        ax5 = plt.imshow(test_img, cmap='gray')
+        ax5 = plt.title('Example Car Image')
+        ax5 = plt.subplot(122)
+        ax5 = plt.imshow(hog_image, cmap='gray')
+        ax5 = plt.title('HOG Visualization')
+        ax5 = plt.savefig('HOG_features.png')
 
     # Normalize training data
     X_rescaled = StandardScaler().fit(X)
@@ -670,15 +700,40 @@ if __name__ == "__main__":
                                     hog_channel=hog_channel)
 
         # Draw the found windows that match the features in boxes
-        window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
-        window_img2 = draw_boxes(window_img, hot_windows2, color=(0, 0, 255), thick=6)
+        window_img1 = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
+        window_img2 = draw_boxes(window_img1, hot_windows2, color=(0, 0, 255), thick=6)
         window_img3 = draw_boxes(window_img2, hot_windows3, color=(0, 0, 255), thick=6)
 
-        # Plot the examples
-        ax1 = plt.figure()
-        ax1 = plt.clf()
-        ax1 = plt.imshow(window_img3)
-        ax1 = plt.savefig('test_images.png')
+        if __debug__:
+            print("Check files with boxes/windows...")
+            # Plot the examples
+            ax6 = plt.figure()
+            ax6 = plt.clf()
+            ax6 = plt.subplot(121)
+            ax6 = plt.imshow(image)
+            ax6 = plt.title('Test Image')
+            ax6 = plt.subplot(122)
+            ax6 = plt.imshow(window_img3)
+            ax6 = plt.title('Boxes')
+            ax6 = plt.savefig(f_name[:-4] + '_A_Window3.png')
+            ax7 = plt.figure()
+            ax7 = plt.clf()
+            ax7 = plt.subplot(121)
+            ax7 = plt.imshow(image)
+            ax7 = plt.title('Test Image')
+            ax7 = plt.subplot(122)
+            ax7 = plt.imshow(window_img2)
+            ax7 = plt.title('Boxes')
+            ax7 = plt.savefig(f_name[:-4] + '_B_Window2.png')
+            ax8 = plt.figure()
+            ax8 = plt.clf()
+            ax8 = plt.subplot(121)
+            ax8 = plt.imshow(image)
+            ax8 = plt.title('Test Image')
+            ax8 = plt.subplot(122)
+            ax8 = plt.imshow(window_img1)
+            ax8 = plt.title('Boxes')
+            ax8 = plt.savefig(f_name[:-4] + '_C_Window1.png')
 
         ystart = 400
         ystop = 656
@@ -687,12 +742,6 @@ if __name__ == "__main__":
         out_img, boxes = find_cars(image, ystart, ystop, scale, svc, X_rescaled, orient, pix_per_cell, cell_per_block,
                                    spatial_size, hist_bins)
         if __debug__:
-            # Plot the examples
-            ax2 = plt.figure()
-            ax2 = plt.clf()
-            ax2 = plt.imshow(out_img)
-            ax2 = plt.savefig('test_image_boxes.png')
-
             print("Boxes found: ", boxes)
 
         threshold = 1
@@ -704,20 +753,34 @@ if __name__ == "__main__":
         labels = label(heatmap)
         if __debug__:
             print("Vehicles found: ", labels[1])
-            plt.imshow(labels[0], cmap='hot')
+            ax9 = plt.figure()
+            ax9 = plt.clf()
+            ax9 = plt.subplot(121)
+            ax9 = plt.imshow(image)
+            ax9 = plt.title('Test Image')
+            ax9 = plt.subplot(122)
+            ax9 = plt.imshow(heatmap, cmap='hot')
+            ax9 = plt.title('Detected targets - heatmap')
+            ax9 = plt.savefig(f_name[:-4] + '_D_heat.png')
 
         draw_img2 = draw_labeled_boxes(np.copy(image), labels)
         if __debug__:
             # Plot the examples
-            ax3 = plt.figure()
-            ax3 = plt.clf()
-            ax3 = plt.imshow(draw_img2)
-            ax3 = plt.savefig('heatmap.png')
+            ax10 = plt.figure()
+            ax10 = plt.clf()
+            ax10 = plt.subplot(121)
+            ax10 = plt.imshow(image)
+            ax10 = plt.title('Test Image')
+            ax10 = plt.subplot(122)
+            ax10 = plt.imshow(draw_img2)
+            ax10 = plt.title('Detected targets')
+            ax10 = plt.savefig(f_name[:-4] + '_E_targets.png')
+
         # End of FOR loop
 
     # Process video
-    video_input = VideoFileClip("./project_video.mp4")
-    video_output = './OUTPUT_VIDEO.mp4'
+    #video_input = VideoFileClip("./project_video.mp4")
+    #video_output = './OUTPUT_VIDEO.mp4'
 
-    output_clip = video_input.fl_image(process_image)
-    output_clip.write_videofile(video_output, audio=False)
+    #output_clip = video_input.fl_image(process_image)
+    #output_clip.write_videofile(video_output, audio=False)
