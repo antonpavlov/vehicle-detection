@@ -41,32 +41,44 @@ The following approach was suggested during the course:
 
 ### Examples of calibration, processing and training data ###
 Camera calibration - Original and Undistorted images
+
 ![Original and Undistorted images](https://github.com/antonpavlov/vehicle-detection/blob/master/tests/calibration-test_2_UnitTestundistort.png)
+
 <br />
 
 
 Training data - vehicle and non-vehicle
+
 ![Training dataset](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/datasetExamples.png)
+
 <br />
 
 
 HOG features
+
 ![HOG features](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/HOG_features.png)
+
 <br />
 
 
 Objects were classified correctly by SVM 
+
 ![Boxes](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_A_Window3.png)
+
 <br />
 
 
 "Heatmap" 
+
 ![Heatmap](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_D_heat.png)
+
 <br />
 
 
 Targets were detected correctly
+
 ![Targets](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_E_targets.png)
+
 <br />
 
 ### Future work ###
