@@ -3,6 +3,7 @@ Vehicle Detection and Tracking - Udacity Self-Driving Car Engineer Nanodegree.
 
 The goal of this project is to build a software pipeline for an automatic recognition of vehicles from a video stream. The main piece of the script is a classifier that uses a[Support Vector Machine](https://en.wikipedia.org/wiki/Support_vector_machine) - a machine learning algorithm for classification based on supervised learning. This project strongly relies and contains references to Udacity's self-driving car Nanodegree program.
 
+
 ### Contents of the repo ###
 `<camera_cal>` - A folder with calibration images <br />
 `<dataset>` - A folder with images used for classifier training. It is a placeholder. <br />
@@ -20,6 +21,7 @@ Before run a script from this repo, please setup an environment with all require
     
 Download also a training data from Udacity's project repository: [here (vehicles)](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip), and [here (non-vehicles)](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) Please place them into `dataset` folder.
 
+To run the script in a debug mode, please use the -O option.
 
 
 ### Reflection ###
@@ -32,11 +34,7 @@ The following approach was suggested during the course:
 
 ### Technical restrictions and weaknesses ###
 - Calibration coefficients are related to a specific camera used to record images. 
-- Script in this repo works only with 1280 X 720 images.
-- The proposed pipeline has several weaknesses related to lane marks recognition. Some of them are related to lightning conditions, time of the day, and weather (rain and snow); some of them are related to road surface quality.
-- The pipeline is not able to do any inference regarding lane marks and vehicle position when part of the lane ahead is obstructed by another car.
-- The pipeline relies on existence of the road marking on that particular road under evaluation. 
-- Unfortunately, most of coefficients of a transforms and a thresholds are specified on empirical basis considering only images, proposed by Udacity. 
+- Despite a certain robustness, the proposed pipeline depends on classifier's ability to generalize. Failures on that matter may lead to wrong results during the tracking.
 
 
 ### Examples of processing ###
