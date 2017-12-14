@@ -407,10 +407,10 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                 ypos = yb * cells_per_step
                 xpos = xb * cells_per_step
                 # Extract hog features
-                hog_feat1 = hog1[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
-                hog_feat2 = hog2[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
-                hog_feat3 = hog3[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
-                hog_features = np.hstack((hog_feat1, hog_feat2, hog_feat3))
+                hog_feature1 = hog1[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+                hog_feature2 = hog2[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+                hog_feature3 = hog3[ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+                hog_features = np.hstack((hog_feature1, hog_feature2, hog_feature3))
 
                 x_left = xpos * pix_per_cell
                 y_top = ypos * pix_per_cell
@@ -420,8 +420,6 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                 spatial_features = bin_spatial(subimg, size=spatial_size)
                 hist_features = color_hist(subimg, nbins=hist_bins)
 
-                #test_features2 = np.concatenate((spatial_features, hist_features, hog_features))
-                #test_features = X_scaler.transform(np.array(test_features2)).reshape(1, -1)
                 test_features = X_scaler.transform(np.hstack((spatial_features, hist_features,
                                                              hog_features)).reshape(1, -1))
                 test_prediction = svc.predict(test_features)
@@ -430,15 +428,21 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                     xbox_left = np.int(x_left * scale)
                     ytop_draw = np.int(y_top * scale)
                     win_draw = np.int(window*scale)
-                    cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw, ytop_draw+
-                                                                         win_draw+ystart),(0,0,255),6)
-                    boxes.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw, ytop_draw+
-                                                                         win_draw+ystart)))
+                    cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw, ytop_draw +
+                                                                         win_draw + ystart), (0, 0, 255), 6)
+                    boxes.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw, ytop_draw +
+                                                                         win_draw + ystart)))
         return draw_img, boxes
 
 
 # Ready for test - not commented
 def add_heat(heatmap, bbox_list):
+    """
+    Add a heatmap for each box in a list of boxes
+    :param heatmap:
+    :param bbox_list: list with boxes
+    :return:
+    """
     for box in bbox_list:
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
     return heatmap
@@ -506,7 +510,7 @@ if __name__ == "__main__":
         ax1 = plt.imshow(image)
         ax1 = plt.subplot(122)
         ax1 = plt.imshow(result)
-        ax1 = plt.savefig(fname[:-4] + '_1_boxes.png')
+        ax1 = plt.savefig(fname[:-4] + '_1_UnitTestboxes.png')
 
 
     # Unit test on Support Vector Machine from sklearn
@@ -533,7 +537,7 @@ if __name__ == "__main__":
         ax2 = plt.imshow(image)
         ax2 = plt.subplot(122)
         ax2 = plt.imshow(undist_image)
-        ax2 = plt.savefig(fname[:-4] + '_2_undistort.png')
+        ax2 = plt.savefig(fname[:-4] + '_2_UnitTestundistort.png')
 
     # Unit test on sliding window function
     if __debug__:
@@ -547,7 +551,7 @@ if __name__ == "__main__":
         ax3 = plt.imshow(image)
         ax3 = plt.subplot(122)
         ax3 = plt.imshow(window_img)
-        ax3 = plt.savefig(fname[:-4] + '_3_slidingWindows.png')
+        ax3 = plt.savefig(fname[:-4] + '_3_UnitTestslidingWindows.png')
 
     # MAIN PARAMETERS
     color_space = 'YCrCb'  # RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -764,6 +768,7 @@ if __name__ == "__main__":
             ax9 = plt.savefig(f_name[:-4] + '_D_heat.png')
 
         draw_img2 = draw_labeled_boxes(np.copy(image), labels)
+
         if __debug__:
             # Plot the examples
             ax10 = plt.figure()
@@ -779,8 +784,8 @@ if __name__ == "__main__":
         # End of FOR loop
 
     # Process video
-    #video_input = VideoFileClip("./project_video.mp4")
-    #video_output = './OUTPUT_VIDEO.mp4'
+    video_input = VideoFileClip("./project_video.mp4")
+    video_output = './OUTPUT_VIDEO.mp4'
 
-    #output_clip = video_input.fl_image(process_image)
-    #output_clip.write_videofile(video_output, audio=False)
+    output_clip = video_input.fl_image(process_image)
+    output_clip.write_videofile(video_output, audio=False)
