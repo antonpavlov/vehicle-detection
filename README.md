@@ -30,94 +30,44 @@ The following approach was suggested during the course:
 2. Apply a distortion correction to every raw image to be processed.
 3. Train a classifier on provided dataset.
 4. In each video frame or a still image, search for a objects using a sliding window approach. Three sizes different sizes are used in the script 64 by 64, 100 by 100, and 200 by 200, overlap each sliding window by a half of its size.
-5. Feed a classifier with all windowed images and get a number of cars  
+5. Feed a classifier with all windowed images and get a list of its predictions.
+6. Highlight targets with boxes.
+7. Return to step 4.    
 
 ### Technical restrictions and weaknesses ###
 - Calibration coefficients are related to a specific camera used to record images. 
-- Despite a certain robustness, the proposed pipeline depends on classifier's ability to generalize. Failures on that matter may lead to wrong results during the tracking.
+- Despite a certain robustness (0.9893 of accuracy on training data), the proposed pipeline depends on classifier's ability to generalize. Failures on that matter may lead to wrong results during the tracking.
 
 
-### Examples of processing ###
-Camera calibration - Original image
-![Original](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/calibration1_processed.png)
-
-
-Camera calibration - Undistorted image
-![Undistorted](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/calibration1_undistorted.png)
-
-<br />
-
-Let's build the following pipeline:
-
-1. Open an image
-
-![Processed](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_A_processed.png)
-
+### Examples of calibration, processing and training data ###
+Camera calibration - Original and Undistorted images
+![Original and Undistorted images](https://github.com/antonpavlov/vehicle-detection/blob/master/tests/calibration-test_2_UnitTestundistort.png)
 <br />
 
 
-2. Apply image correction
-
-![Undistort](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_B_undistort.png)
-
+Training data - vehicle and non-vehicle
+![Training dataset](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/datasetExamples.png)
 <br />
 
 
-3. Application of Sobel operator on undistorted image 
-
-![Gradient](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_C_abs_sobel_thresh.png)
-
+HOG features
+![HOG features](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/HOG_features.png)
 <br />
 
 
-4. Filter an image by gradient magnitude in both (x and y) directions 
-
-![Magnitude](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_D_mag_thresh.png)
-
+Objects were classified correctly by SVM 
+![Boxes](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_A_Window3.png)
 <br />
 
 
-5. Filter an image considering gradient orientation 
-
-![Orientation](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_E_dir_binary.png)
-
+"Heatmap" 
+![Heatmap](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_D_heat.png)
 <br />
 
 
-6. HLS color space threshold 
-
-![HLS](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_F_hls_select.png)
-
+Targets were detected correctly
+![Targets](https://github.com/antonpavlov/vehicle-detection/blob/master/output_images/test4_E_targets.png)
 <br />
-
-
-7. All thresholds applied together to undistorted image
-
-![All_together](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_G_combined_thresh.png)
-
-<br />
-
-
-8. Perspective transform; warp-in image
-
-![Perspective](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_H_perspective.png)
-
-<br />
-
-
-9. Find lanes in a binary warped image
-
-![Lanes](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_I_lanes.png)
-
-<br />
-
-
-10. Make curvature calculations; vehicle position and draw results over an original image
-
-![Lanes](https://github.com/antonpavlov/adv-lanelines/blob/master/support_files/test3_K_final.png)
-
-<br />
-
 
 ### Future work ###
 As a future work, it might be possible to get better classification results using Convolutional Neural Networks. It is also very interesting to implement `vehicle-detector` script in an embedded system and deploy it in a real environment. Of course, several improvements and parameter tunning can be done in terms of code. 

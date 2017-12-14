@@ -19,7 +19,6 @@ from moviepy.editor import VideoFileClip
 
 
 # *** FUNCTIONS ***
-# Ready for release
 def calibration():
     """
     Camera calibration function for compensation of radial and tangential distortions.
@@ -82,7 +81,7 @@ def calibration():
     # End of FOR loop
     return cal_mtx, cal_dist
 
-# Ready for release
+
 def draw_boxes(input_image, bboxes, color=(0, 0, 255), thick=6):
     """
     Draw boxes in an input image
@@ -105,16 +104,13 @@ def draw_boxes(input_image, bboxes, color=(0, 0, 255), thick=6):
 
 def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None], xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
     """
-    Define a function that takes an image,
-    # start and stop positions in both x and y,
-    # window size (x and y dimensions),
-    # and overlap fraction (for both x and y)
-    :param img:
-    :param x_start_stop:
-    :param y_start_stop:
-    :param xy_window:
-    :param xy_overlap:
-    :return:
+    Slide a window from start to stop position over a region of interest (ROI) with overlapping
+    :param img: Input image
+    :param x_start_stop: ROI
+    :param y_start_stop: ROI
+    :param xy_window: Window size
+    :param xy_overlap: Overlap
+    :return: A list of windows
     """
     # If x and/or y start/stop positions not defined, set to image size
     if x_start_stop[0] is None:
@@ -155,14 +151,13 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None], xy_w
     return window_list
 
 
-# Ready for test - not commented
 def color_hist(img, nbins=32, bins_range=(0, 256)):
     """
     Get color features
-    :param img:
-    :param nbins:
-    :param bins_range:
-    :return:
+    :param img: Input image
+    :param nbins: Number of bins
+    :param bins_range: A value range within a bin
+    :return: Image features derived from its histogram
     """
     # Compute the histogram of the color channels separately
     channel1_hist = np.histogram(img[:, :, 0], bins=nbins, range=bins_range)
@@ -174,29 +169,27 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
     return hist_features
 
 
-# Ready for test - not commented
 def bin_spatial(img, size=(32, 32)):
     """
     Return the feature vector
-    :param img:
-    :param size:
-    :return:
+    :param img: Input image
+    :param size: Desired size
+    :return: A contiguous flattened array
     """
     features = cv2.resize(img, size).ravel()
     return features
 
 
-# Ready for test - not commented
 def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=True):
     """
     Get HOG features
-    :param img:
-    :param orient:
-    :param pix_per_cell:
-    :param cell_per_block:
-    :param vis:
-    :param feature_vec:
-    :return:
+    :param img: Input image
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param vis: Generate a HOG image or not
+    :param feature_vec: HOG features on or off
+    :return: Feature vector
     """
     if vis == True:
         features, hog_image = hog(img, orientations=orient,
@@ -214,22 +207,21 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, featu
         return features
 
 
-# Ready for test - not commented
 def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=32, orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0, spatial_feat=True, hist_feat=True, hog_feat=True):
     """
-    Combine and normalize
-    :param imgs:
-    :param color_space:
-    :param spatial_size:
-    :param hist_bins:
-    :param orient:
-    :param pix_per_cell:
-    :param cell_per_block:
-    :param hog_channel:
-    :param spatial_feat:
-    :param hist_feat:
-    :param hog_feat:
-    :return:
+    Extract features, combine them and normalize
+    :param imgs: Input image
+    :param color_space: A color space
+    :param spatial_size: Spatial binning dimensions
+    :param hist_bins: Number of histogram bins
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param hog_channel: Channel of interest (0, 1, 2, ALL)
+    :param spatial_feat: Spatial features on or off
+    :param hist_feat: Histogram features on or off
+    :param hog_feat: HOG features on or off
+    :return: List of feature vectors
     """
     # Create a list to append feature vectors to
     features = []
@@ -277,8 +269,22 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32), hist_bins=3
     return features
 
 
-# Ready for test - not commented
 def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins=32, orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0, spatial_feat=True, hist_feat=True, hog_feat=True):
+    """
+    Extract features from single image, combine them and normalize
+    :param imgs: Input image
+    :param color_space: A color space
+    :param spatial_size: Spatial binning dimensions
+    :param hist_bins: Number of histogram bins
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param hog_channel: Channel of interest (0, 1, 2, ALL)
+    :param spatial_feat: Spatial features on or off
+    :param hist_feat: Histogram features on or off
+    :param hog_feat: HOG features on or off
+    :return: List of feature vectors
+    """
     # Empty list
     img_features = []
     # Apply color conversion
@@ -322,8 +328,23 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32), hist_bins
     return np.concatenate(img_features)
 
 
-# Ready for test - not commented
 def search_windows(img, windows, clf, scaler, color_space='RGB', spatial_size=(32, 32), hist_bins=32, hist_range=(0, 256), orient=9, pix_per_cell=8, cell_per_block=2, hog_channel=0):
+    """
+    Find windows of interest
+    :param img: Input image
+    :param windows: List of windows
+    :param clf: Classifier
+    :param scaler: A per-column scaler
+    :param color_space: A color space
+    :param spatial_size: Spatial binning dimensions
+    :param hist_bins: Number of histogram bins
+    :param hist_range: A range for values within a bin
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param hog_channel: Channel of interest (0, 1, 2, ALL)
+    :return: List of windows of interest
+    """
     # Create an empty list for the found windows
     on_windows = []
     # Iterate over all windows in the windows list
@@ -347,8 +368,13 @@ def search_windows(img, windows, clf, scaler, color_space='RGB', spatial_size=(3
     return on_windows
 
 
-# Ready for test - not commented - Not necessary
 def convert_color(img, conv='RGB2YCrCb'):
+    """
+    Perform a color space conversion.
+    :param img: Input image
+    :param conv: Desired color space
+    :return: Converted image
+    """
     if conv == 'RGB2YCrCb':
         return cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
     if conv == 'BGR2YCrCb':
@@ -357,47 +383,47 @@ def convert_color(img, conv='RGB2YCrCb'):
         return cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
 
 
-# Ready for test - not commented
 def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
     """
-    find cars function as shown in the lession
-    function uses a scale-factor to search with different window sizes
-    function as well replaces the overlapping with cells_per_steps
-    :param img:
-    :param ystart:
-    :param ystop:
-    :param scale:
-    :param svc:
-    :param X_scaler:
-    :param orient:
-    :param pix_per_cell:
-    :param cell_per_block:
-    :param spatial_size:
-    :param hist_bins:
-    :return:
+    Search for vehicles in an image
+    Function uses a scale-factor to search with different window sizes
+    :param img: Input image
+    :param ystart: Vertical higher limit for search
+    :param ystop: Vertical lower limit for search
+    :param scale: Scaling factor
+    :param svc: A classifier
+    :param X_scaler: A per-column scaler
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param spatial_size: Spatial binning dimensions
+    :param hist_bins: Number of histogram bins
+    :return: Processed image, list of boxes
     """
     draw_img = np.copy(img)
     img = img.astype(np.float32)/255
-    img_tosearch = img[ystart:ystop,:,:]
+    img_tosearch = img[ystart:ystop, :, :]
     ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
     boxes = []
     if scale != 1:
         imshape = ctrans_tosearch.shape
-        ctrans_tosearch = cv2.resize(ctrans_tosearch,(np.int(imshape[1]/scale),(np.int(imshape[0]/scale))))
+        ctrans_tosearch = cv2.resize(ctrans_tosearch, (np.int(imshape[1]/scale), (np.int(imshape[0]/scale))))
         ch1 = ctrans_tosearch[:,:,0]
         ch2 = ctrans_tosearch[:,:,1]
         ch3 = ctrans_tosearch[:,:,2]
+
         #Blocks and steps
         nxblocks = (ch1.shape[1] // pix_per_cell) - cell_per_block + 1
         nyblocks = (ch1.shape[0] // pix_per_cell) - cell_per_block + 1
         nfeat_per_block = orient * cell_per_block**2
         window = 64
         nblocks_per_window = (window // pix_per_cell) - cell_per_block + 1
+
         # Replacing overlapping with cells_per_step
         cells_per_step = 2
         nxsteps = (nxblocks - nblocks_per_window) // cells_per_step
         nysteps = (nyblocks - nblocks_per_window) // cells_per_step
-        #get hog features
+
         hog1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
         hog2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
         hog3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
@@ -435,56 +461,82 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
         return draw_img, boxes
 
 
-# Ready for test - not commented
 def add_heat(heatmap, bbox_list):
     """
     Add a heatmap for each box in a list of boxes
-    :param heatmap:
+    :param heatmap: a heatmap dummy
     :param bbox_list: list with boxes
-    :return:
+    :return: Updated image
     """
     for box in bbox_list:
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
     return heatmap
 
 
-# Ready for test - not commented
 def apply_threshold(heatmap, threshold):
+    """
+    Clean up a heatmap image
+    :param heatmap: a heatmap image
+    :param threshold: Threshold
+    :return: Updated image
+    """
     heatmap[heatmap <= threshold] = 0
     return heatmap
 
 
-# Ready for test - not commented
 def draw_labeled_boxes(img, labels):
+    """
+    Draw boxes for each target
+    :param img: Input image
+    :param labels: List of labels
+    :return: Image with boxes over targets
+    """
     for car_number in range(1, labels[1]+1):
         nonzero = (labels[0] == car_number).nonzero()
         nonzeroy = np.array(nonzero[0])
         nonzerox = np.array(nonzero[1])
         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
-        #print(bbox[0], bbox[1])
-        #cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
         img = draw_boxes(img, [bbox], color=(0, 0, 255), thick=6)
     return img
 
 
-# Ready for test - not commented
 def vehicle_detection(image, ystart, ystop, scale, svc, X_Scaler, orient,pix_per_cell, cell_per_block, spatial_size,
                       hist_bins, threshold):
-    #find cars in image
+    """
+    Find vehicles in an image
+    :param image: Input image
+    :param ystart: Upper limit for search
+    :param ystop: Lower limit for search
+    :param scale: Scaling factor
+    :param svc: A classifier for prediction
+    :param X_Scaler: A per-column scaler
+    :param orient: HOG orientations
+    :param pix_per_cell: HOG pixels per cell
+    :param cell_per_block: HOG cells per block
+    :param spatial_size: patial binning dimensions
+    :param hist_bins: Number of histogram bins
+    :param threshold: Threshold
+    :return: processed image with targets (if any) highlighted by boxes
+    """
+    image = cv2.undistort(image, mtx, dist, None, mtx)
     out_img, boxes = find_cars(image, ystart, ystop, scale, svc, X_Scaler, orient,
                                pix_per_cell, cell_per_block, spatial_size, hist_bins)
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
     box_list = boxes
     heat = add_heat(heat, box_list)
-    heat= apply_threshold(heat, threshold)
+    heat = apply_threshold(heat, threshold)
     heatmap = np.clip(heat, 0, 255)
     labels = label(heatmap)
     draw_img = draw_labeled_boxes(np.copy(image), labels)
     return draw_img
 
-# Ready for test - not commented
+
 def process_image(image):
-    #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    """
+    Run a pipeline on each video frame
+    :param image: frame image
+    :return: processed image
+    """
     processed_img = vehicle_detection(image, ystart, ystop, scale, svc, X_rescaled, orient,pix_per_cell, cell_per_block, spatial_size,
                       hist_bins, threshold)
     return processed_img
@@ -511,7 +563,6 @@ if __name__ == "__main__":
         ax1 = plt.subplot(122)
         ax1 = plt.imshow(result)
         ax1 = plt.savefig(fname[:-4] + '_1_UnitTestboxes.png')
-
 
     # Unit test on Support Vector Machine from sklearn
     if __debug__:
@@ -679,7 +730,7 @@ if __name__ == "__main__":
         image = image.astype(np.float32) / 255
 
         # Search with three different window sizes
-        windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
+        windows1 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
                                 xy_window=(100, 100), xy_overlap=(0.5, 0.5))
         windows2 = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop,
                                 xy_window=(200, 200), xy_overlap=(0.3, 0.3))
@@ -687,7 +738,7 @@ if __name__ == "__main__":
                                 xy_window=(64, 64), xy_overlap=(0.3, 0.3))
 
         # Get the found windows that match the features as list
-        hot_windows = search_windows(image, windows, svc, X_rescaled, color_space=color_space,
+        hot_windows1 = search_windows(image, windows1, svc, X_rescaled, color_space=color_space,
                                     spatial_size=spatial_size, hist_bins=hist_bins,
                                     orient=orient, pix_per_cell=pix_per_cell,
                                     cell_per_block=cell_per_block,
@@ -704,7 +755,7 @@ if __name__ == "__main__":
                                     hog_channel=hog_channel)
 
         # Draw the found windows that match the features in boxes
-        window_img1 = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)
+        window_img1 = draw_boxes(draw_image, hot_windows1, color=(0, 0, 255), thick=6)
         window_img2 = draw_boxes(window_img1, hot_windows2, color=(0, 0, 255), thick=6)
         window_img3 = draw_boxes(window_img2, hot_windows3, color=(0, 0, 255), thick=6)
 
@@ -739,9 +790,9 @@ if __name__ == "__main__":
             ax8 = plt.title('Boxes')
             ax8 = plt.savefig(f_name[:-4] + '_C_Window1.png')
 
-        ystart = 400
-        ystop = 656
-        scale = 1.5
+        ystart = 400  # Upper limit
+        ystop = 656  # Lower limit
+        scale = 1.5  # Scale factor
 
         out_img, boxes = find_cars(image, ystart, ystop, scale, svc, X_rescaled, orient, pix_per_cell, cell_per_block,
                                    spatial_size, hist_bins)
@@ -770,7 +821,6 @@ if __name__ == "__main__":
         draw_img2 = draw_labeled_boxes(np.copy(image), labels)
 
         if __debug__:
-            # Plot the examples
             ax10 = plt.figure()
             ax10 = plt.clf()
             ax10 = plt.subplot(121)
