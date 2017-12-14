@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This script is heavly relies on materials and functions provided during the course. It also was inspired by the following repo: https://github.com/azumf/CarND-Vehicle-Detection-P5
 
 # *** IMPORTS ***
 import numpy as np
